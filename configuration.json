@@ -1,0 +1,16 @@
+{
+    "host": "he-rs-qa.c0zg8wy1vjbd.us-east-1.redshift.amazonaws.com",
+    "database": "dev",
+    "port": "5439",
+    "user": "snowflake_adf",
+    "password" : "mui@q62w5$em!^2X",
+    "sf_user": "pavan.telanakula@actabl.com",
+    "sf_password": "Pavan@0008",
+    "sf_account": "ld47042.east-us-2.azure",
+    "sf_warehouse": "NONPROD_DE_WH",
+    "sf_database": "FIVETRAN_QA_RAW_HE_DB",
+    "sf_schema": "HE_HEDATAINT",
+    "sf_role": "DATA_ENGINEER_FRL",
+    "batch_process_size": "10000",
+    "batch_query_size": "1000000"
+  }
