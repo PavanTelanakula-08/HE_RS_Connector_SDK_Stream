@@ -170,18 +170,15 @@ def update(configuration: dict, state: dict, cancel_flag=lambda: False):
     snowflake_cursor.close()
     snowflake_conn.close()
 
-def redshift_to_snowflake_for_ui(configuration, batch_size, cancel_flag=lambda: False):
+def redshift_to_snowflake_for_ui(configuration, batch_size, only_tables=None):
     state = {}
     batch_counter = 0
     total_records = 0
 
-    for result in update(configuration, state, cancel_flag=cancel_flag):
-        if cancel_flag():
-            safe_log_info("Sync cancelled in top-level generator.")
-            break
-
+    for result in update(configuration, state):
         if isinstance(result, dict) and result.get("type") == "UPSERT":
             total_records += 1
+
         elif isinstance(result, dict) and result.get("type") == "CHECKPOINT":
             batch_counter += 1
             yield {
@@ -191,6 +188,13 @@ def redshift_to_snowflake_for_ui(configuration, batch_size, cancel_flag=lambda: 
                 "batch": batch_counter,
                 "checkpoint": result.get("state", {})
             }
+
+        else:
+            yield {
+                "type": "log",
+                "message": str(result)
+            }
+
 
 connector = Connector(update=update, schema=schema)
 
