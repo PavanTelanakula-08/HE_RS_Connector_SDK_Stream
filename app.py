@@ -80,6 +80,9 @@ log_placeholder = st.empty()
 progress_bar = st.progress(0)
 status_text = st.empty()
 
+def cancel_flag():
+    return st.session_state.cancel_requested
+
 if st.session_state.is_syncing and not st.session_state.cancel_requested:
     try:
         with open(config_path, "r") as f:
@@ -98,7 +101,13 @@ if st.session_state.is_syncing and not st.session_state.cancel_requested:
         while should_continue():
             synced_tables = 0
             total_records = 0
-            for result in redshift_to_snowflake_for_ui(config, batch_size=batch_size):
+
+            for result in redshift_to_snowflake_for_ui(
+                config,
+                batch_size=batch_size,
+                only_tables=selected_tables,
+                cancel_flag=cancel_flag  # ← LIVE CANCEL FLAG
+            ):
                 if st.session_state.cancel_requested:
                     log_placeholder.code("❌ Sync cancelled by user.", language="text")
                     break
@@ -132,6 +141,8 @@ if st.session_state.is_syncing and not st.session_state.cancel_requested:
             st.success(f"✅ Sync complete. Total records transferred: {total_records}")
         else:
             st.warning("⚠️ Sync cancelled.")
+            progress_bar.progress(0)
+            status_text.text("❌ Sync cancelled by user.")
 
     except Exception as e:
         st.error(f"❌ Error during sync: {str(e)}")

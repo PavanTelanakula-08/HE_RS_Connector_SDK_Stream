@@ -170,12 +170,15 @@ def update(configuration: dict, state: dict, cancel_flag=lambda: False):
     snowflake_cursor.close()
     snowflake_conn.close()
 
-def redshift_to_snowflake_for_ui(configuration, batch_size, only_tables=None):
+def redshift_to_snowflake_for_ui(configuration, batch_size, only_tables=None, cancel_flag=lambda: False):
     state = {}
     batch_counter = 0
     total_records = 0
 
-    for result in update(configuration, state):
+    if only_tables:
+        configuration["only_tables"] = only_tables
+
+    for result in update(configuration, state, cancel_flag=cancel_flag):
         if isinstance(result, dict) and result.get("type") == "UPSERT":
             total_records += 1
 
@@ -194,6 +197,7 @@ def redshift_to_snowflake_for_ui(configuration, batch_size, only_tables=None):
                 "type": "log",
                 "message": str(result)
             }
+
 
 
 connector = Connector(update=update, schema=schema)
